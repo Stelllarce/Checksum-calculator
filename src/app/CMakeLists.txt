@@ -1,16 +1,17 @@
-add_executable(application)
+add_executable(main)
 
-# set_target_properties(application PROPERTIES OUTPUT_NAME "app")
+# Set a more descriptive name for the command-line executable
+set_target_properties(main PROPERTIES OUTPUT_NAME "checksum-calculator")
 
 target_link_libraries(
-	application
+	main
 	PRIVATE
 		calculators
 		tclap::tclap
 )
 
 target_sources(
-	application
+	main
 	PRIVATE
-		"application.cpp"
+		main.cpp
 )
