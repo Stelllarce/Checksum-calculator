@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+# CMake
+build*
+
+# Ignore all but CMake config, files will be downloaded through cmake
+lib/*
+!lib/CMakeLists.txt
