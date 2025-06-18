@@ -10,7 +10,9 @@ target_link_libraries(
 target_sources(
     unit-tests
     PRIVATE
-        "test_calculators/test_md5.cpp"
+        test_calculators/test_md5.cpp
+        test_calculators/test_sha1.cpp
+        test_calculators/test_sha256.cpp
 )
 
 # Automatically register all tests

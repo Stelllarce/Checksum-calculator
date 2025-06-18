@@ -14,5 +14,3 @@ private:
     /// Shared MD5 instance for checksum calculations
     static MD5 md5;
 };
-
-MD5 Md5Calculator::md5 = MD5();

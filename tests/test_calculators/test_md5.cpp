@@ -1,6 +1,10 @@
 #include "calculators/Md5Calculator.hpp"
 #include <catch2/catch_all.hpp>
 
+/**
+ * @test MD5 checksum calculation
+ * Expected results are from http://www.sha1-online.com/
+ */
 TEST_CASE("MD5 Checksum Calculation", "[Md5Calculator]") {
     Md5Calculator md5Calculator;
 
