@@ -5,14 +5,16 @@ target_link_libraries(
     PRIVATE
         Catch2::Catch2WithMain
         calculators
+        fscomp
 )
 
 target_sources(
     unit-tests
     PRIVATE
-        test_calculators/test_md5.cpp
-        test_calculators/test_sha1.cpp
-        test_calculators/test_sha256.cpp
+        "test-calculators/test_md5.cpp"
+        "test-calculators/test_sha1.cpp"
+        "test-calculators/test_sha256.cpp"
+        "test-file-system/test_file.cpp"
 )
 
 # Automatically register all tests
