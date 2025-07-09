@@ -11,7 +11,7 @@ target_link_libraries(
 target_sources(
     calculators
     PRIVATE
-        Md5Calculator.cpp
-        SHA1Calculator.cpp
-        SHA256Calculator.cpp
+        "Md5Calculator.cpp"
+        "SHA1Calculator.cpp"
+        "SHA256Calculator.cpp"
 )

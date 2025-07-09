@@ -1,3 +1,4 @@
+#pragma once
 #include "ChecksumCalculator.hpp"
 #include "sha256.h"
 
@@ -14,6 +15,6 @@ public:
      */
     std::string calculate(const std::string& data) noexcept override;
 private:
-    /// Shared SHA256 instance for checksum calculations
-    static SHA256 sha256;
+    
+    static SHA256 sha256; ///< Shared SHA256 instance for checksum calculations
 };

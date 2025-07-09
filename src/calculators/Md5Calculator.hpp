@@ -1,3 +1,4 @@
+#pragma once
 #include "ChecksumCalculator.hpp"
 #include "md5.h" // Include external md5 library
 
@@ -11,6 +12,6 @@ public:
     std::string calculate(const std::string& data) noexcept override;
 
 private:
-    /// Shared MD5 instance for checksum calculations
-    static MD5 md5;
+    
+    static MD5 md5; ///< Shared MD5 instance for checksum calculations
 };
