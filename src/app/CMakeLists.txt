@@ -13,5 +13,5 @@ target_link_libraries(
 target_sources(
 	main
 	PRIVATE
-		main.cpp
+		"main.cpp"
 )
