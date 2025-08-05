@@ -17,7 +17,11 @@ class Directory;
 
 /**
  * @class abstract class, serves as the "Component" class 
- * in the Composite pattern. Client should interact with this class
+ * in the Composite pattern. 
+ * 
+ * Client should interact with this class
+ * 
+ * Represents an abstraction for all objects in the file system
  */
 class FileObject {
 public:
@@ -39,21 +43,20 @@ public:
     virtual size_t getSize() = 0;
 
     virtual bool setSize(size_t size) { return false; }
-
     
     /**
      * @brief Add a Component to the Composite collection
      * @return true if the fileObject was added, false otherwise
      * Defaults to false so that it can not be overriden by the Leaf class.
      */
-    virtual bool add(std::unique_ptr<FileObject>&) { return false; }
+    virtual bool add(std::unique_ptr<FileObject>) { return false; }
     
     /**
      * @brief Remove a Component from the Composite collection
      * @return true if the fileObject was removed, false otherwise
      * Defaults to false so that it can not be overriden by the Leaf class.
      */
-    virtual bool remove(std::unique_ptr<FileObject>&) { return false; }
+    virtual bool remove(const std::string&) { return false; }
     
     /**
      * @brief Get a child Component from the Composite collection
@@ -113,8 +116,6 @@ protected:
 
 
     std::string _filepath; ///< Whole path to object
-
-    size_t _size = 0;
 
     /**
      * Non-owning refrence to owner object

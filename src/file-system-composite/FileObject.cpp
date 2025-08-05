@@ -3,6 +3,11 @@
 
 FileObject::FileObject(const std::string& name, FileObject* owner) 
     : _owner(owner) {
+    
+    if(name.empty()) {
+        throw std::runtime_error("File object must have a non-empty name");
+    }
+
     // If there is an owner (not nullptr)
     if (owner) {
         // Check type of object pointer

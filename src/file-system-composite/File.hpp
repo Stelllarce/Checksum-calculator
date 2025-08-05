@@ -4,6 +4,7 @@
 
 /**
  * @class child class, that represents the "Leaf" in the Composite pattern.
+ * 
  * It represents a file in the file system.
  */
 class File : public FileObject {
@@ -31,6 +32,8 @@ public:
     std::string read() const override;
 private:
     std::string _contents;
+
+    size_t _size = 0;
 
     /**
      * @todo Maybe add a struct with state flags?
