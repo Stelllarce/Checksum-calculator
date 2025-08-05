@@ -15,6 +15,7 @@ target_sources(
         "test-calculators/test_sha1.cpp"
         "test-calculators/test_sha256.cpp"
         "test-file-system/test_file.cpp"
+        "test-file-system/test_directory.cpp"
 )
 
 # Automatically register all tests
