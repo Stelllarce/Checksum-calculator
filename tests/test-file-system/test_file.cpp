@@ -14,7 +14,7 @@ TEST_CASE("File constructor", "[File]") {
         REQUIRE_NOTHROW(root_dir->createFile("test.txt"));
         
         // Verify the file was added to the directory
-        FileObject* file = root_dir->getChild("root/test.txt");
+        FileObject* file = root_dir->getChild("test.txt");
         REQUIRE(file != nullptr);
         REQUIRE(file->getName() == "test.txt");
         REQUIRE(file->getPath() == "root/test.txt");
@@ -156,8 +156,7 @@ TEST_CASE("File composite pattern behavior", "[File]") {
         FileObject* file = root_dir->createFile("leaf.txt");
         
         std::unique_ptr<FileObject> child_dir = std::make_unique<Directory>("child");
-        std::unique_ptr<FileObject> child_ptr = std::move(child_dir);
-        REQUIRE(file->add(child_ptr) == false);
+        REQUIRE(file->add(std::move(child_dir)) == false);
     }
     
     SECTION("File cannot remove children") {
@@ -165,8 +164,8 @@ TEST_CASE("File composite pattern behavior", "[File]") {
         FileObject* file = root_dir->createFile("leaf.txt");
         
         std::unique_ptr<FileObject> child_dir = std::make_unique<Directory>("child");
-        std::unique_ptr<FileObject> child_ptr = std::move(child_dir);
-        REQUIRE(file->remove(child_ptr) == false);
+        std::string to_remove = child_dir->getName();
+        REQUIRE(file->remove(to_remove) == false);
     }
     
     SECTION("File has no children") {
@@ -230,10 +229,8 @@ TEST_CASE("File content management", "[File]") {
 TEST_CASE("File edge cases and error handling", "[File]") {
     SECTION("Empty filename") {
         std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("test");
-        FileObject* file = root_dir->createFile("");
         
-        REQUIRE(file->getName() == "");
-        REQUIRE(file->getPath() == "test/");
+        REQUIRE_THROWS_AS(root_dir->createFile(""), std::runtime_error);
     }
     
     SECTION("Very long filename") {
@@ -273,9 +270,9 @@ TEST_CASE("File polymorphic behavior", "[File]") {
         
         // Composite methods should return default values
         std::unique_ptr<FileObject> dummy_child = std::make_unique<Directory>("dummy");
-        std::unique_ptr<FileObject> dummy_ptr = std::move(dummy_child);
-        REQUIRE(file_obj->add(dummy_ptr) == false);
-        REQUIRE(file_obj->remove(dummy_ptr) == false);
+        std::string to_remove = dummy_child->getName();
+        REQUIRE(file_obj->add(std::move(dummy_child)) == false);
+        REQUIRE(file_obj->remove(to_remove) == false);
         REQUIRE(file_obj->getChild("anything") == nullptr);
         
         // Factory methods should return nullptr for files
@@ -305,7 +302,7 @@ TEST_CASE("File memory and resource management", "[File]") {
         REQUIRE(file->getOwner() == root_dir.get());
         
         // Verify file is in parent's children
-        FileObject* found_file = root_dir->getChild("owner_test/owned.txt");
+        FileObject* found_file = root_dir->getChild("owned.txt");
         REQUIRE(found_file == file);
     }
 }

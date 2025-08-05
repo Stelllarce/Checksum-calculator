@@ -10,9 +10,7 @@ size_t Directory::calculateSize() const {
 }
 
 Directory::Directory(const std::string& name, FileObject* owner) 
-    : FileObject(name, owner) {
-        // Directory construction complete - parent addition should be handled by client code
-    }
+    : FileObject(name, owner) {}
 
 std::string Directory::getName() const {
     size_t pos = _filepath.find_last_of(PATH_SEPARATOR);
@@ -24,37 +22,30 @@ std::string Directory::getPath() const {
 }
 
 size_t Directory::getSize() {
-    if (_size == 0) {
-        _size = calculateSize();
-    }
-    return _size;
+    return calculateSize();
 }
 
-bool Directory::add(std::unique_ptr<FileObject>& obj) {
+bool Directory::add(std::unique_ptr<FileObject> obj) {
     if (obj == nullptr) {
         return false;
     }
-    auto path = obj->getPath();
-    // Same path of a FileObject cannot be added to the Directory
-    if (_children.find(path) != _children.end()) {
+    auto name = obj->getName();
+    // Same name of a FileObject cannot be added to the Directory
+    if (_children.find(name) != _children.end()) {
         return false; 
     }
 
-    _children[path] = std::move(obj);
-    _children[path]->setOwner(*this);
-    _size += _children[path]->getSize();
+    _children[name] = std::move(obj);
+    _children[name]->setOwner(*this);
     return true;
 }
 
-bool Directory::remove(std::unique_ptr<FileObject>& obj) {
-    if (obj == nullptr) {
+bool Directory::remove(const std::string& path) {
+    if (path.empty()) {
         return false;
     }
-
-    auto path = obj->getPath();
     auto it = _children.find(path);
     if (it != _children.end()) {
-        _size -= it->second->getSize();
         _children.erase(it);
         return true;
     }
@@ -81,9 +72,7 @@ Directory* Directory::createSubdirectory(const std::string& name) {
     auto subdir = std::make_unique<Directory>(name, this);
     Directory* subdirPtr = subdir.get();
     
-    // Convert to base type for add function
-    std::unique_ptr<FileObject> basePtr = std::move(subdir);
-    if (!add(basePtr)) {
+    if (!add(std::move(subdir))) {
         throw std::runtime_error("Failed to add subdirectory '" + name + "' to parent directory");
     }
     
@@ -93,10 +82,8 @@ Directory* Directory::createSubdirectory(const std::string& name) {
 File* Directory::createFile(const std::string& name) {
     auto file = std::make_unique<File>(name, this);
     File* filePtr = file.get();
-    
-    // Convert to base type for add function
-    std::unique_ptr<FileObject> basePtr = std::move(file);
-    if (!add(basePtr)) {
+
+    if (!add(std::move(file))) {
         throw std::runtime_error("Failed to add file '" + name + "' to parent directory");
     }
     

@@ -4,18 +4,16 @@
 #include <map>
 #include <memory>
 
-// Forward declarations
-class File;
-
 /**
  * @class child class, that represents the "Composite" in the Composite pattern.
+ * 
  * It represents a directory in the file system.
  */
 class Directory: public FileObject {
 public:
     Directory(const std::string& name, FileObject* owner = nullptr);
 
-    /**
+    /**multiple
      * @brief Factory method to create a subdirectory and add it to this directory
      * @param name - name of the new subdirectory
      * @return raw pointer to the created directory (ownership transferred to this directory)
@@ -27,19 +25,19 @@ public:
      * @param name - name of the new file
      * @return raw pointer to the created file (ownership transferred to this directory)
      */
-    File* createFile(const std::string& name) override;
+    class File* createFile(const std::string& name) override;
 
     /**
      * @brief Add a Component to the Composite collection
      * @return true if the fileObject was added, false otherwise
      */
-    bool add(std::unique_ptr<FileObject>& ) override;
+    bool add(std::unique_ptr<FileObject>) override;
 
     /**
      * @brief Remove a Component from the Composite collection
      * @return true if the fileObject was removed, false otherwise
      */
-    bool remove(std::unique_ptr<FileObject>&) override;
+    bool remove(const std::string&) override;
 
     /**
      * @brief Get a child Component from the Composite collection
@@ -62,7 +60,7 @@ private:
     size_t calculateSize() const;
 
     /**
-     * @brief path of file - pointer to object
+     * @brief name of file - pointer to object
      */
     std::map<std::string, std::unique_ptr<FileObject>> _children;
 };
