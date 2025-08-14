@@ -6,7 +6,7 @@ public:
     Link(const std::filesystem::path& name, const std::filesystem::path& target_path, FileObject* owner);
 
     // Pure virtual methods from FileObject
-    const std::string& getName() const override;
+    std::string getName() const override;
     size_t getSize() override;
 
     // Link-specific methods

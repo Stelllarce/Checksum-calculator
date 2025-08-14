@@ -12,10 +12,8 @@ size_t Directory::calculateSize() const {
 Directory::Directory(const std::filesystem::path& name, FileObject* owner) 
     : FileObject(name, owner) {}
 
-const std::string& Directory::getName() const {
-    static thread_local std::string filename;
-    filename = _filepath.filename().string();
-    return filename;
+std::string Directory::getName() const {
+    return _filepath.filename().string();
 }
 
 size_t Directory::getSize() {

@@ -47,7 +47,7 @@ public:
     FileObject* getChild(const std::filesystem::path& name) noexcept override;
     const FileObject* getChild(const std::filesystem::path& name) const noexcept override;
 
-    const std::string& getName() const override ;
+    std::string getName() const override;
 
     size_t getSize() override;
 private:

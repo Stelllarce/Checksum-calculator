@@ -9,11 +9,9 @@ File::File(const std::filesystem::path& name, FileObject* owner)
         }
     }
 
-const std::string& File::getName() const {
-    static thread_local std::string filename;
+std::string File::getName() const {
     if (_filepath.has_filename()) {
-        filename = _filepath.filename().string();
-        return filename;
+        return _filepath.filename().string();
     }
     throw std::logic_error("File without owning directory is invalid");
 }

@@ -3,11 +3,9 @@
 Link::Link(const std::filesystem::path& name, const std::filesystem::path& target_path, FileObject* owner) :
                 FileObject(name, owner), _target_name(target_path) {}
 
-const std::string& Link::getName() const {
-    static thread_local std::string filename;
+std::string Link::getName() const {
     if (_filepath.has_filename()) {
-        filename = _filepath.filename().string();
-        return filename;
+        return _filepath.filename().string();
     }
     throw std::logic_error("Link without valid path");
 }

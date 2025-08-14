@@ -14,7 +14,7 @@ public:
     /**
      * @throws std::logic_error if no path separator symbol found
      */
-    const std::string& getName() const override;
+    std::string getName() const override;
     
     size_t getSize() override;
     

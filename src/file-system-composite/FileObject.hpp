@@ -20,7 +20,7 @@ public:
     /**
      * @return the string after the last slash in the path.
      */
-    virtual const std::string& getName() const = 0;
+    virtual std::string getName() const = 0;
 
     /**
      * @return _filepath - full path to the file or directory
