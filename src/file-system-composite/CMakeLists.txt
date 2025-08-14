@@ -6,4 +6,5 @@ target_sources(
         "Directory.cpp"
         "File.cpp"
         "FileObject.cpp"
+        "Link.cpp"
 )
