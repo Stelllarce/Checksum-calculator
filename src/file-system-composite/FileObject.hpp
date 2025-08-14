@@ -3,17 +3,7 @@
 #include <cstddef>
 #include <memory>
 #include <istream>
-
-/**
- * File separator, system dependent.
- */
-#if defined(_WIN32)
-    const char PATH_SEPARATOR = '\\';
-#else
-    const char PATH_SEPARATOR = '/';
-#endif
-
-class Directory;
+#include <filesystem>
 
 /**
  * @class abstract class, serves as the "Component" class 
@@ -30,12 +20,12 @@ public:
     /**
      * @return the string after the last slash in the path.
      */
-    virtual std::string getName() const = 0;
+    virtual const std::string& getName() const = 0;
 
     /**
      * @return _filepath - full path to the file or directory
      */
-    virtual std::string getPath() const = 0;
+    virtual std::string getPath() const { return _filepath.string(); };
 
     /**
      * @return the size in bytes of the file or directory.
@@ -56,7 +46,7 @@ public:
      * @return true if the fileObject was removed, false otherwise
      * Defaults to false so that it can not be overriden by the Leaf class.
      */
-    virtual bool remove(const std::string&) { return false; }
+    virtual bool remove(const std::filesystem::path&) { return false; }
     
     /**
      * @brief Get a child Component from the Composite collection
@@ -64,8 +54,8 @@ public:
      * @return pointer to the child FileObject, or nullptr if not found
      * Defaults to nullptr so that it can not be overriden by the Leaf class.
      */
-    virtual FileObject* getChild(const std::string& name) noexcept { return nullptr; }
-    virtual const FileObject* getChild(const std::string& name) const noexcept { return nullptr; } 
+    virtual FileObject* getChild(const std::filesystem::path& name) noexcept { return nullptr; }
+    virtual const FileObject* getChild(const std::filesystem::path& name) const noexcept { return nullptr; } 
 
     /**
      * @brief Factory method to create a file and add it to this FileObject
@@ -73,7 +63,7 @@ public:
      * @return raw pointer to the created file (ownership transferred to this FileObject)
      * Defaults to nullptr so that it can not be overriden by the Leaf class.
      */
-    virtual class File* createFile(const std::string& name) { return nullptr; }
+    virtual class File* createFile(const std::filesystem::path& name) { return nullptr; }
 
     /**
      * @brief Factory method to create a subdirectory and add it to this FileObject
@@ -81,21 +71,17 @@ public:
      * @return raw pointer to the created directory (ownership transferred to this FileObject)
      * Defaults to nullptr so that it can not be overriden by the Leaf class.
      */
-    virtual class Directory* createSubdirectory(const std::string& name) { return nullptr; }
+    virtual class Directory* createSubdirectory(const std::filesystem::path& name) { return nullptr; }
 
     /**
      * @brief set owner of current object
      */
-    void setOwner(FileObject& owner) {
-        _owner = &owner;
-    }
+    void setOwner(FileObject& owner) { _owner = &owner; }
     
     /**
      * @return pointer to owner of current object
      */
-    FileObject* getOwner() const {
-        return _owner;
-    }
+    FileObject* getOwner() const { return _owner; }
 
     /**
      * @brief Writing contents to a file object
@@ -103,6 +89,19 @@ public:
      */
     virtual void write(std::istream& from) {}
     virtual std::string read() const { return ""; } 
+
+    /**
+     * @brief Link methods
+     */
+
+    virtual const std::filesystem::path& getTarget() const { 
+        static const std::filesystem::path empty_path;
+        return empty_path; 
+    }
+
+    virtual bool setResolveTarget(std::unique_ptr<FileObject> t) { return false; }
+
+    virtual FileObject* getResolvedTarget() const { return nullptr; }
 
 protected:
     /**
@@ -112,13 +111,13 @@ protected:
      * @note This may need changes, having Directory explicitly stated
      * There is no other way to check without repeating code
      */
-    FileObject(const std::string& name, FileObject* owner);
+    FileObject(const std::filesystem::path& name, FileObject* owner);
 
 
-    std::string _filepath; ///< Whole path to object
+    std::filesystem::path _filepath; ///< Whole path to object
 
     /**
-     * Non-owning refrence to owner object
+     * @brief Non-owning refrence to owner object
      * Should not be released
      */
     FileObject* _owner = nullptr;

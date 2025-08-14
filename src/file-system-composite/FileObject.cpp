@@ -1,7 +1,7 @@
 #include "FileObject.hpp"
 #include "Directory.hpp"
 
-FileObject::FileObject(const std::string& name, FileObject* owner) 
+FileObject::FileObject(const std::filesystem::path& name, FileObject* owner) 
     : _owner(owner) {
     
     if(name.empty()) {
@@ -20,7 +20,7 @@ FileObject::FileObject(const std::string& name, FileObject* owner)
         
         // If there is a path already
         if (!owner_d->_filepath.empty()) {
-            _filepath = owner_d->_filepath + PATH_SEPARATOR + name;
+            _filepath = owner_d->_filepath / name;
         } else { 
             throw std::logic_error("This should not be reached."
                  "Owning directory has no saved path for some reason, even its own name..");

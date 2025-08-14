@@ -2,23 +2,20 @@
 #include <cassert>
 #include "File.hpp"
 
-File::File(const std::string& name, FileObject* owner) 
+File::File(const std::filesystem::path& name, FileObject* owner) 
     : FileObject(name, owner) {
         if (!owner) {
             throw std::logic_error("File without owning directory is invalid");
         }
     }
 
-std::string File::getName() const {
-    size_t pos = _filepath.find_last_of(PATH_SEPARATOR);
-    if (pos == std::string::npos) {
-        throw std::logic_error("File without owning directory is invalid");
+const std::string& File::getName() const {
+    static thread_local std::string filename;
+    if (_filepath.has_filename()) {
+        filename = _filepath.filename().string();
+        return filename;
     }
-    return _filepath.substr(pos + 1);
-}
-
-std::string File::getPath() const {
-    return _filepath;
+    throw std::logic_error("File without owning directory is invalid");
 }
 
 size_t File::getSize() {

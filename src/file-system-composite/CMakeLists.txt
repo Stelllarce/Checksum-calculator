@@ -1,7 +1,7 @@
-add_library(fscomp STATIC)
+add_library(file-system-composite STATIC)
 
 target_sources(
-    fscomp
+    file-system-composite
     PRIVATE
         "Directory.cpp"
         "File.cpp"

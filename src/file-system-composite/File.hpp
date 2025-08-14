@@ -9,14 +9,12 @@
  */
 class File : public FileObject {
 public:
-    File(const std::string& name, FileObject* owner);
+    File(const std::filesystem::path& name, FileObject* owner);
 
     /**
      * @throws std::logic_error if no path separator symbol found
      */
-    std::string getName() const override;
-
-    std::string getPath() const override;
+    const std::string& getName() const override;
     
     size_t getSize() override;
     
