@@ -5,7 +5,7 @@ target_link_libraries(
     PRIVATE
         Catch2::Catch2WithMain
         calculators
-        fscomp
+        file-system-composite
 )
 
 target_sources(

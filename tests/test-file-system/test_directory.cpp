@@ -556,7 +556,6 @@ TEST_CASE("Directory edge cases and error handling", "[Directory]")
 
         // getChild with empty string
         FileObject *empty_name = dir.getChild("");
-        // Should either return nullptr or handle gracefully
 
         // createFile/createSubdirectory with empty names
         REQUIRE_THROWS_AS(dir.createFile(""), std::runtime_error);
