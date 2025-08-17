@@ -93,11 +93,7 @@ public:
     /**
      * @brief Link methods
      */
-
-    virtual const std::filesystem::path& getTarget() const { 
-        static const std::filesystem::path empty_path;
-        return empty_path; 
-    }
+    virtual std::filesystem::path getTarget() const { return ""; } 
 
     virtual bool setResolveTarget(std::unique_ptr<FileObject> t) { return false; }
 
@@ -121,4 +117,6 @@ protected:
      * Should not be released
      */
     FileObject* _owner = nullptr;
+private:
+    void buildPath(const std::filesystem::path& name, FileObject* owner);
 };

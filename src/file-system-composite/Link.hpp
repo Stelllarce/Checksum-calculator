@@ -10,7 +10,7 @@ public:
     size_t getSize() override;
 
     // Link-specific methods
-    const std::filesystem::path& getTarget() const override;
+    std::filesystem::path getTarget() const override;
     bool setResolveTarget(std::unique_ptr<FileObject> t) override;
     FileObject* getResolvedTarget() const override;
 private:

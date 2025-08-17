@@ -7,7 +7,12 @@ FileObject::FileObject(const std::filesystem::path& name, FileObject* owner)
     if(name.empty()) {
         throw std::runtime_error("File object must have a non-empty name");
     }
+    
+    buildPath(name, owner);
+}
 
+void FileObject::buildPath(const std::filesystem::path& name, FileObject* owner) {
+    
     // If there is an owner (not nullptr)
     if (owner) {
         // Check type of object pointer
@@ -27,5 +32,5 @@ FileObject::FileObject(const std::filesystem::path& name, FileObject* owner)
         }
     } else { // Root folder
         _filepath = name;
-    } 
+    }
 }
