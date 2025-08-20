@@ -6,6 +6,7 @@ target_link_libraries(
         Catch2::Catch2WithMain
         calculators
         file-system-composite
+        directory-tree-builders
 )
 
 target_sources(
@@ -17,6 +18,7 @@ target_sources(
         "test-file-system/test_file.cpp"
         "test-file-system/test_directory.cpp"
         "test-file-system/test_link.cpp"
+        "test-utils/test-cycle-detector.cpp"
 )
 
 # Automatically register all tests

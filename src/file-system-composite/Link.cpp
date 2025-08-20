@@ -14,7 +14,7 @@ size_t Link::getSize() {
     if (_resolved_target) {
         return _resolved_target->getSize();
     }
-    return 0; // Unresolved links have no size
+    return 0; 
 }
 
 std::filesystem::path Link::getTarget() const {
