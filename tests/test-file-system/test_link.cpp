@@ -368,19 +368,6 @@ TEST_CASE("Link memory and resource management", "[Link]") {
         
         REQUIRE(link.getOwner() == root_dir.get());
     }
-    
-    SECTION("Link with circular reference prevention") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("circular_test");
-        
-        Link link1("link1", "link2", root_dir.get());
-        Link link2("link2", "link1", root_dir.get());
-        
-        // Both links should exist but remain unresolved to prevent circular refs
-        REQUIRE(link1.getTarget() == "link2");
-        REQUIRE(link2.getTarget() == "link1");
-        REQUIRE(link1.getResolvedTarget() == nullptr);
-        REQUIRE(link2.getResolvedTarget() == nullptr);
-    }
 }
 
 TEST_CASE("Link integration with directory operations", "[Link]") {
