@@ -93,7 +93,7 @@ public:
     /**
      * @brief Link methods
      */
-    virtual std::filesystem::path getTarget() const { return ""; } 
+    virtual std::filesystem::path getTarget() const { return std::filesystem::path(""); } 
 
     virtual bool setResolveTarget(std::unique_ptr<FileObject> t) { return false; }
 
