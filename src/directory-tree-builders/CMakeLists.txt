@@ -10,4 +10,8 @@ target_sources(
     directory-tree-builders
     PRIVATE
         "CycleDetector.cpp"
+        "LinkFollowBuilder.cpp"
+        "BaseBuilder.cpp"
+        "NonFollowLinkBuilder.cpp"
+        "DirectoryConstructor.cpp"
 )

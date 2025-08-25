@@ -3,14 +3,14 @@
 #include <filesystem>
 #include <stdexcept>
 #include <iostream>
+#include "DetectionStrategy.hpp"
 
 /**
  * @brief Class for tracking circular dependencies between links
  */
-class CycleDetector {
+class CycleDetector : public DetectionStrategy {
 public:
     bool check(const std::filesystem::path& path);
-
 private:
     std::unordered_set<std::filesystem::path> _visited_paths;
 };

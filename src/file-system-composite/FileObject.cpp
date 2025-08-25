@@ -1,5 +1,5 @@
 #include "FileObject.hpp"
-#include "Directory.hpp"
+#include "File.hpp"
 
 FileObject::FileObject(const std::filesystem::path& name, FileObject* owner) 
     : _owner(owner) {
@@ -16,16 +16,17 @@ void FileObject::buildPath(const std::filesystem::path& name, FileObject* owner)
     // If there is an owner (not nullptr)
     if (owner) {
         // Check type of object pointer
-        auto owner_d = dynamic_cast<Directory*>(owner);
+        auto owner_f = dynamic_cast<File*>(owner);
 
-        // If owner is anything but a directory
-        if (!owner_d) {
-            throw std::runtime_error("Owner object can only be of type Directory*");
+        // If owner is a file (not allowed - only directories can own other objects)
+        if (owner_f) {
+            throw std::runtime_error("Owner object cannot be of type File*");
         }
         
+        // Owner must be a Directory (or Link, but we'll treat it as a generic FileObject)
         // If there is a path already
-        if (!owner_d->_filepath.empty()) {
-            _filepath = owner_d->_filepath / name;
+        if (!owner->_filepath.empty()) {
+            _filepath = owner->_filepath / name;
         } else { 
             throw std::logic_error("This should not be reached."
                  "Owning directory has no saved path for some reason, even its own name..");
