@@ -15,11 +15,6 @@ void DirectoryConstructor::construct(std::initializer_list<std::filesystem::path
                 continue;
             }
 
-            if (std::filesystem::is_regular_file(root_path)) {
-                _builder.buildFile(root_path);
-                continue;
-            }
-            
             if (std::filesystem::is_symlink(root_path)) {
                 auto target = std::filesystem::read_symlink(root_path);
                 Directory* traversal_target = _builder.buildLink(root_path, target);
@@ -27,6 +22,11 @@ void DirectoryConstructor::construct(std::initializer_list<std::filesystem::path
                     traverse(traversal_target->getPath());
                     _builder.endBuildDirectory();
                 }
+                continue;
+            }
+
+            if (std::filesystem::is_regular_file(root_path)) {
+                _builder.buildFile(root_path);
                 continue;
             }
 
