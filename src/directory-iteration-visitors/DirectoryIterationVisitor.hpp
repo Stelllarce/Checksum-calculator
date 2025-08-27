@@ -23,5 +23,5 @@ protected:
     virtual void applyAlgorithm(File& file) { }
     virtual void postProcess(File& file) { }
 protected:
-    std::ostream& _output;
+    std::ostream& _output; // For testing
 };
