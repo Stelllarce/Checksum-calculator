@@ -50,6 +50,8 @@ public:
     std::string getName() const override;
 
     size_t getSize() override;
+
+    void accept(DirectoryIterationVisitor& visitor) override;
 private:
     /**
      * @brief Calculate the size of the whole 

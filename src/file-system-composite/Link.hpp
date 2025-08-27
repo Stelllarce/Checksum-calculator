@@ -13,6 +13,8 @@ public:
     std::filesystem::path getTarget() const override;
     bool setResolveTarget(std::unique_ptr<FileObject> t) override;
     FileObject* getResolvedTarget() const override;
+
+    void accept(DirectoryIterationVisitor& visitor);
 private:
     /**
      * @note this could be either relative or full path

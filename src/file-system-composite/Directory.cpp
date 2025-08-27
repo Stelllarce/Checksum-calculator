@@ -1,5 +1,6 @@
 #include "Directory.hpp"
 #include "File.hpp"
+#include "directory-iteration-visitors/DirectoryIterationVisitor.hpp"
 
 size_t Directory::calculateSize() const {
     size_t totalSize = 0;
@@ -83,4 +84,12 @@ File* Directory::createFile(const std::filesystem::path& name) {
     }
     
     return filePtr;
+}
+
+void Directory::accept(DirectoryIterationVisitor& visitor) {
+    visitor.visitDirectory(*this);
+
+    for(const auto& [name, child] : _children) {
+        child->accept(visitor);
+    }
 }

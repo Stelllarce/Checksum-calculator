@@ -1,6 +1,9 @@
 #include <stdexcept>
 #include <cassert>
+#include <fstream>
+#include <vector>
 #include "File.hpp"
+#include "directory-iteration-visitors/DirectoryIterationVisitor.hpp"
 
 File::File(const std::filesystem::path& name, FileObject* owner) 
     : FileObject(name, owner) {
@@ -17,6 +20,14 @@ std::string File::getName() const {
 }
 
 size_t File::getSize() {
+    try {
+        // Get the actual file size from the filesystem
+        if (std::filesystem::exists(_filepath)) {
+            _size = std::filesystem::file_size(_filepath);
+        }
+    } catch (const std::filesystem::filesystem_error&) {
+        // If we can't get the file size, keep the current _size value
+    }
     return _size;
 }
 
@@ -28,17 +39,27 @@ bool File::setSize(size_t size) {
     return true;
 }
 
-void File::write(std::istream& from) {
-    if (!from.good()) {
-        throw std::ios_base::failure("Error: Writing contents from bad stream");
+std::vector<char> File::read() const {
+    std::ifstream file_stream(_filepath, std::ios::binary);
+    if (!file_stream.is_open()) {
+        throw std::ios_base::failure("Error: Could not open file for reading: " + _filepath.string());
     }
-    from >> _contents;
-    if (!setSize(read().size())) {
-        throw std::runtime_error("Bad content size");
+    
+    file_stream.seekg(0, std::ios::end);
+    size_t file_size = file_stream.tellg();
+    file_stream.seekg(0, std::ios::beg);
+    
+    std::vector<char> contents(file_size);
+    file_stream.read(contents.data(), file_size);
+    
+    if (file_stream.fail() && !file_stream.eof()) {
+        throw std::ios_base::failure("Error: Failed to read data from file: " + _filepath.string());
     }
-    if (from.eof()) from.clear();
+    
+    file_stream.close();
+    return contents;
 }
 
-std::string File::read() const {
-    return _contents;
+void File::accept(DirectoryIterationVisitor& visitor) {
+    visitor.visitFile(*this);
 }

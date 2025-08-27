@@ -3,7 +3,11 @@
 #include <cstddef>
 #include <memory>
 #include <istream>
+#include <fstream>
+#include <vector>
 #include <filesystem>
+
+class DirectoryIterationVisitor;
 
 /**
  * @class abstract class, serves as the "Component" class 
@@ -84,11 +88,10 @@ public:
     FileObject* getOwner() const { return _owner; }
 
     /**
-     * @brief Writing contents to a file object
-     * @param from - stream to get the contents of the file
+     * @brief Reading binary data from a file
+     * @return vector of binary data read from the file
      */
-    virtual void write(std::istream& from) {}
-    virtual std::string read() const { return ""; } 
+    virtual std::vector<char> read() const { return std::vector<char>(); } 
 
     /**
      * @brief Link methods
@@ -98,6 +101,12 @@ public:
     virtual bool setResolveTarget(std::unique_ptr<FileObject> t) { return false; }
 
     virtual FileObject* getResolvedTarget() const { return nullptr; }
+
+
+    /**
+     * @brief Visitor methods
+     */
+    virtual void accept(DirectoryIterationVisitor& visitor) = 0;
 
 protected:
     /**

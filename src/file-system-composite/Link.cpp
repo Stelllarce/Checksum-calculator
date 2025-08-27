@@ -1,4 +1,5 @@
 #include "Link.hpp"
+#include "directory-iteration-visitors/DirectoryIterationVisitor.hpp"
 
 Link::Link(const std::filesystem::path& name, const std::filesystem::path& target_path, FileObject* owner) :
                 FileObject(name, owner), _target_name(target_path) {}
@@ -30,4 +31,8 @@ bool Link::setResolveTarget(std::unique_ptr<FileObject> t) {
 
 FileObject* Link::getResolvedTarget() const {
     return _resolved_target.get();
+}
+
+void Link::accept(DirectoryIterationVisitor& visitor) {
+    visitor.visitLink(*this);
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include "FileObject.hpp"
 #include "Directory.hpp"
+#include <vector>
+#include <fstream>
 
 /**
  * @class child class, that represents the "Leaf" in the Composite pattern.
@@ -21,16 +23,15 @@ public:
     bool setSize(size_t) override;
 
     /**
-     * @brief Writing contents to a file object, acts as a setter for @var _contents
-     * @param from - stream to get the contents of the file
-     * @throws std::ios_base::failure when bad stram is passed
-     * @throws std::runtime_error when size is not set properly
+     * @brief Reading binary data from a file
+     * @return vector of binary data read from the file
+     * @throws std::ios_base::failure when file cannot be opened or read
      */
-    void write(std::istream& from) override;
-    std::string read() const override;
-private:
-    std::string _contents;
+    std::vector<char> read() const override;
 
+
+    void accept(DirectoryIterationVisitor& visitor) override;
+private:
     size_t _size = 0;
 
     /**
