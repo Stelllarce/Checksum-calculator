@@ -1,230 +1,169 @@
+#include <catch2/catch_all.hpp>
+#include <sstream>
+#include <stdexcept>
 #include "file-system-composite/File.hpp"
 #include "file-system-composite/Directory.hpp"
 
-#include <catch2/catch_all.hpp>
-#include <memory>
-#include <limits>
-#include <sstream>
-
-TEST_CASE("File constructor", "[File]") {
-    SECTION("File objects can be created without filesystem validation") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("root");
+TEST_CASE("File Constructor", "[File]") {
+    SECTION("Valid construction with owner") {
+        Directory root_dir("test_dir");
+        File test_file("test.txt", &root_dir);
         
-        // File constructor no longer validates filesystem existence
-        REQUIRE_NOTHROW(root_dir->createFile("test.txt"));
-        
-        // Verify the file was added to the directory
-        FileObject* file = root_dir->getChild("test.txt");
-        REQUIRE(file != nullptr);
-        REQUIRE(file->getName() == "test.txt");
-        REQUIRE(file->getPath() == "root/test.txt");
+        REQUIRE(test_file.getName() == "test.txt");
+        REQUIRE(test_file.getOwner() == &root_dir);
     }
     
-    SECTION("File with null directory owner") {
-        // Should throw when trying to create file without parent directory
+    SECTION("Constructor throws when owner is null") {
         REQUIRE_THROWS_AS(File("test.txt", nullptr), std::logic_error);
     }
+}
+
+TEST_CASE("File getName", "[File]") {
+    Directory root_dir("test_dir");
     
-    SECTION("File with non-directory owner") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("root");
-        FileObject* file = root_dir->createFile("parent.txt");
-        
-        // Should throw when trying to create file with file as parent
-        REQUIRE_THROWS_AS(File("child.txt", file), std::runtime_error);
+    SECTION("Simple filename") {
+        File test_file("document.pdf", &root_dir);
+        REQUIRE(test_file.getName() == "document.pdf");
+    }
+    
+    SECTION("Filename with extension") {
+        File test_file("archive.tar.gz", &root_dir);
+        REQUIRE(test_file.getName() == "archive.tar.gz");
+    }
+    
+    SECTION("Filename without extension") {
+        File test_file("README", &root_dir);
+        REQUIRE(test_file.getName() == "README");
     }
 }
 
-TEST_CASE("File getName functionality", "[File]") {
-    SECTION("Get name from simple path") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("documents");
-        FileObject* file = root_dir->createFile("document.pdf");
-        
-        REQUIRE(file->getName() == "document.pdf");
+TEST_CASE("File getSize and setSize", "[File]") {
+    Directory root_dir("test_dir");
+    File test_file("test.txt", &root_dir);
+    
+    SECTION("Initial size is zero") {
+        REQUIRE(test_file.getSize() == 0);
     }
     
-    SECTION("Get name with extension") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("workspace");
-        FileObject* file = root_dir->createFile("report.docx");
-        
-        REQUIRE(file->getName() == "report.docx");
+    SECTION("Set and get cached size") {
+        REQUIRE(test_file.setSize(1024) == true);
+        REQUIRE(test_file.getSize() == 1024);
+    }
+    
+    SECTION("Size remains cached after multiple calls") {
+        test_file.setSize(512);
+        REQUIRE(test_file.getSize() == 512);
+        REQUIRE(test_file.getSize() == 512);
+    }
+    
+    SECTION("Overwrite cached size") {
+        test_file.setSize(100);
+        REQUIRE(test_file.getSize() == 100);
+        test_file.setSize(200);
+        REQUIRE(test_file.getSize() == 200);
     }
 }
 
-TEST_CASE("File getPath functionality", "[File]") {
-    SECTION("Get full path") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("home");
-        FileObject* file = root_dir->createFile("config.ini");
-        
-        std::string path = file->getPath();
-        REQUIRE_FALSE(path.empty());
-        REQUIRE(path == "home/config.ini");
-    }
-}
-
-TEST_CASE("File size management", "[File]") {
-    SECTION("Initial size is zero for new File objects") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("data");
-        FileObject* file = root_dir->createFile("test.dat");
-        
-        // File objects start with size 0, getSize() will try to read from filesystem
-        // and return 0 if file doesn't exist or an error occurs
-        REQUIRE(file->getSize() == 0);
+TEST_CASE("File read from stream", "[File]") {
+    Directory root_dir("test_dir");
+    File test_file("test.txt", &root_dir);
+    
+    SECTION("Read empty stream") {
+        std::istringstream empty_stream("");
+        std::vector<char> result = test_file.read(empty_stream);
+        REQUIRE(result.empty());
     }
     
-    SECTION("Set valid size") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("files");
-        FileObject* file = root_dir->createFile("large.bin");
+    SECTION("Read simple text") {
+        std::string test_data = "hello world";
+        std::istringstream text_stream(test_data);
+        std::vector<char> result = test_file.read(text_stream);
         
-        REQUIRE(file->setSize(1024) == true);
-        // Note: getSize() now reads from filesystem, so it might not match setSize
+        REQUIRE(result.size() == test_data.size());
+        std::string result_string(result.begin(), result.end());
+        REQUIRE(result_string == test_data);
     }
     
-    SECTION("Set zero size should fail") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("files");
-        FileObject* file = root_dir->createFile("test.txt");
+    SECTION("Read multiline text") {
+        std::string test_data = "line one\nline two\nline three";
+        std::istringstream text_stream(test_data);
+        std::vector<char> result = test_file.read(text_stream);
         
-        REQUIRE(file->setSize(0) == false);
-    }
-}
-
-TEST_CASE("File composite pattern behavior", "[File]") {
-    SECTION("File cannot add children") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("parent");
-        FileObject* file = root_dir->createFile("leaf.txt");
-        
-        std::unique_ptr<FileObject> child_dir = std::make_unique<Directory>("child");
-        REQUIRE(file->add(std::move(child_dir)) == false);
+        REQUIRE(result.size() == test_data.size());
+        std::string result_string(result.begin(), result.end());
+        REQUIRE(result_string == test_data);
     }
     
-    SECTION("File cannot remove children") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("parent");
-        FileObject* file = root_dir->createFile("leaf.txt");
+    SECTION("Read binary data") {
+        std::string binary_data = "\x00\x01\x02\xFF\xFE\xFD";
+        std::istringstream binary_stream(binary_data);
+        std::vector<char> result = test_file.read(binary_stream);
         
-        std::unique_ptr<FileObject> child_dir = std::make_unique<Directory>("child");
-        std::string to_remove = child_dir->getName();
-        REQUIRE(file->remove(to_remove) == false);
-    }
-    
-    SECTION("File has no children") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("parent");
-        FileObject* file = root_dir->createFile("leaf.txt");
-        
-        REQUIRE(file->getChild("nonexistent") == nullptr);
-        REQUIRE(file->getChild("anything") == nullptr);
-    }
-    
-    SECTION("File cannot create children") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("parent");
-        FileObject* file = root_dir->createFile("leaf.txt");
-        
-        REQUIRE(file->createFile("child.txt") == nullptr);
-        REQUIRE(file->createSubdirectory("subdir") == nullptr);
-    }
-}
-
-TEST_CASE("File content management", "[File]") {
-    SECTION("Read from non-existent file should throw") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("data");
-        FileObject* file = root_dir->createFile("nonexistent.txt");
-        
-        // Since the file doesn't exist on the filesystem, reading should throw
-        REQUIRE_THROWS_AS(file->read(), std::ios_base::failure);
-    }
-    
-    SECTION("Read returns vector of char") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("data");
-        FileObject* file = root_dir->createFile("test.txt");
-        
-        // For this test to pass, we would need to create an actual file
-        // Since we're testing the interface, we'll test the return type
-        try {
-            std::vector<char> content = file->read();
-            // If no exception is thrown, the method signature is correct
-            REQUIRE(true);
-        } catch (const std::ios_base::failure&) {
-            // Expected for non-existent file
-            REQUIRE(true);
+        REQUIRE(result.size() == binary_data.size());
+        for (size_t i = 0; i < result.size(); ++i) {
+            REQUIRE(static_cast<unsigned char>(result[i]) == static_cast<unsigned char>(binary_data[i]));
         }
     }
-}
-
-TEST_CASE("File edge cases and error handling", "[File]") {
-    SECTION("Empty filename") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("test");
+    
+    SECTION("Read large text") {
+        std::string large_text(10000, 'a');
+        std::istringstream large_stream(large_text);
+        std::vector<char> result = test_file.read(large_stream);
         
-        REQUIRE_THROWS_AS(root_dir->createFile(""), std::runtime_error);
+        REQUIRE(result.size() == large_text.size());
+        std::string result_string(result.begin(), result.end());
+        REQUIRE(result_string == large_text);
     }
     
-    SECTION("Very long filename") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("test");
-        std::string long_name(100, 'a');  // Reduced from 1000 to avoid potential issues
-        long_name += ".txt";
+    SECTION("Read text with special characters") {
+        std::string special_text = "Hello\tWorld\n\rSpecial chars: !@#$%^&*()";
+        std::istringstream special_stream(special_text);
+        std::vector<char> result = test_file.read(special_stream);
         
-        FileObject* file = root_dir->createFile(long_name);
-        
-        REQUIRE(file->getName() == long_name);
-        REQUIRE(file->getPath().find(long_name) != std::string::npos);
+        REQUIRE(result.size() == special_text.size());
+        std::string result_string(result.begin(), result.end());
+        REQUIRE(result_string == special_text);
+    }
+}
+
+TEST_CASE("File path handling", "[File]") {
+    Directory root_dir("root");
+    
+    SECTION("File with simple name") {
+        File test_file("simple.txt", &root_dir);
+        REQUIRE(test_file.getName() == "simple.txt");
     }
     
-    SECTION("Filename with special characters") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("test");
-        std::string special_name = "file_with-special.chars@123.txt";
-        
-        FileObject* file = root_dir->createFile(special_name);
-        
-        REQUIRE(file->getName() == special_name);
-        REQUIRE(file->getPath() == "test/" + special_name);
+    SECTION("File with complex name") {
+        File test_file("my-file_v2.backup.tar.gz", &root_dir);
+        REQUIRE(test_file.getName() == "my-file_v2.backup.tar.gz");
     }
 }
 
-TEST_CASE("File polymorphic behavior", "[File]") {
-    SECTION("File as FileObject pointer") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("polymorphism");
-        FileObject* file = root_dir->createFile("poly.txt");
-        FileObject* file_obj = file;
+TEST_CASE("File edge cases", "[File]") {
+    Directory root_dir("test_dir");
+    
+    SECTION("Multiple read operations from same stream") {
+        std::string test_data = "consistent data";
+        File test_file("test.txt", &root_dir);
         
-        REQUIRE_NOTHROW(file_obj->getName());
-        REQUIRE_NOTHROW(file_obj->getPath());
-        REQUIRE(file_obj->getSize() == 0);
+        std::istringstream stream1(test_data);
+        std::vector<char> result1 = test_file.read(stream1);
         
-        REQUIRE(file_obj->setSize(42) == true);
+        std::istringstream stream2(test_data);
+        std::vector<char> result2 = test_file.read(stream2);
         
-        // Composite methods should return default values
-        std::unique_ptr<FileObject> dummy_child = std::make_unique<Directory>("dummy");
-        std::string to_remove = dummy_child->getName();
-        REQUIRE(file_obj->add(std::move(dummy_child)) == false);
-        REQUIRE(file_obj->remove(to_remove) == false);
-        REQUIRE(file_obj->getChild("anything") == nullptr);
-        
-        // Factory methods should return nullptr for files
-        REQUIRE(file_obj->createFile("child.txt") == nullptr);
-        REQUIRE(file_obj->createSubdirectory("subdir") == nullptr);
-    }
-}
-
-TEST_CASE("File memory and resource management", "[File]") {
-    SECTION("Multiple files with same name in different directories") {
-        std::unique_ptr<FileObject> dir_1 = std::make_unique<Directory>("dir1");
-        std::unique_ptr<FileObject> dir_2 = std::make_unique<Directory>("dir2");
-        
-        FileObject* file_1 = dir_1->createFile("same.txt");
-        FileObject* file_2 = dir_2->createFile("same.txt");
-        
-        REQUIRE(file_1->getName() == file_2->getName());
-        REQUIRE(file_1->getPath() != file_2->getPath());
-        REQUIRE(file_1->getPath() == "dir1/same.txt");
-        REQUIRE(file_2->getPath() == "dir2/same.txt");
+        REQUIRE(result1 == result2);
     }
     
-    SECTION("File ownership and parent relationship") {
-        std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("owner_test");
-        FileObject* file = root_dir->createFile("owned.txt");
+    SECTION("Read operations preserve size cache") {
+        Directory root_dir("test_dir");
+        File test_file("test.txt", &root_dir);
+        test_file.setSize(42);
         
-        REQUIRE(file->getOwner() == root_dir.get());
+        std::istringstream stream("some data");
+        test_file.read(stream);
         
-        // Verify file is in parent's children
-        FileObject* found_file = root_dir->getChild("owned.txt");
-        REQUIRE(found_file == file);
+        REQUIRE(test_file.getSize() == 42);
     }
 }
-

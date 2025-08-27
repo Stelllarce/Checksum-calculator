@@ -39,6 +39,12 @@ cmake_print_variables(CMAKE_PREFIX_PATH)
 #   https://cmake.org/cmake/help/latest/manual/ctest.1.html
 include(CTest)
 
+# Define DEBUG globally when building tests
+if(BUILD_TESTING)
+    add_compile_definitions(DEBUG)
+    message(STATUS "Tests enabled - DEBUG macro defined globally")
+endif()
+
 
 # Make Catch2 available
 if(BUILD_TESTING)

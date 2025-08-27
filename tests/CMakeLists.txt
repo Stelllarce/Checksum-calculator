@@ -7,6 +7,7 @@ target_link_libraries(
         calculators
         file-system-composite
         directory-tree-builders
+        directory-iteration-visitors
 )
 
 target_sources(
@@ -22,14 +23,9 @@ target_sources(
         "test-builders/test_follow_link_builder.cpp"
         "test-builders/test_non_follow_link_builder.cpp"
         "test-builders/test_directory_constructor.cpp"
+        "test-visitors/test_hash_writer.cpp"
 )
 
 # Automatically register all tests
 catch_discover_tests(unit-tests)
 
-# Add a custom target to run tests with suppressed stderr
-add_custom_target(test-quiet
-    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure 2>/dev/null
-    DEPENDS unit-tests
-    COMMENT "Running tests with suppressed error output"
-)
