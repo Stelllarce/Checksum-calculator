@@ -2,7 +2,10 @@
 #include "DirectoryStructureBuilder.hpp"
 #include <initializer_list>
 
-
+/**
+ * @brief Director class in the Builder structure
+ * Creates the in-memory file structure
+ */
 class DirectoryConstructor {
 public:
     explicit DirectoryConstructor(DirectoryStructureBuilder& builder);

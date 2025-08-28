@@ -15,25 +15,32 @@ void DirectoryConstructor::construct(std::initializer_list<std::filesystem::path
                 continue;
             }
 
+            if (std::filesystem::is_directory(root_path)) {
+                _builder.startBuildDirectory(root_path);
+                traverse(root_path);
+                _builder.endBuildDirectory();
+            }
+            
             if (std::filesystem::is_symlink(root_path)) {
                 auto target = std::filesystem::read_symlink(root_path);
-                Directory* traversal_target = _builder.buildLink(root_path, target);
+                Directory* traversal_target = _builder.buildLink(root_path.filename(), target);
                 if (traversal_target) {
-                    traverse(traversal_target->getPath());
+                    traverse(traversal_target->getPath().string());
                     _builder.endBuildDirectory();
                 }
                 continue;
             }
 
             if (std::filesystem::is_regular_file(root_path)) {
-                _builder.buildFile(root_path);
-                continue;
-            }
-
-            if (std::filesystem::is_directory(root_path)) {
-                _builder.startBuildDirectory(root_path);
-                traverse(root_path);
+                // For single files, create a parent directory to contain the file
+                auto parent_path = root_path.parent_path();
+                if (parent_path.empty()) {
+                    parent_path = ".";
+                }
+                _builder.startBuildDirectory(parent_path);
+                _builder.buildFile(root_path.filename());
                 _builder.endBuildDirectory();
+                continue;
             }
 
         } catch (const std::filesystem::filesystem_error& e) {
@@ -51,10 +58,10 @@ void DirectoryConstructor::traverse(const std::filesystem::path& currentPath) {
             if (entry.is_symlink()) {
                 try {
                     auto target = std::filesystem::read_symlink(entry.path());
-                    auto traversal_target = _builder.buildLink(entry.path(), target);
+                    auto traversal_target = _builder.buildLink(entry.path().filename(), target);
 
                     if (traversal_target) {
-                        traverse(traversal_target->getPath());
+                        traverse(traversal_target->getPath().string());
                         _builder.endBuildDirectory();
                     }
                 } catch (const std::filesystem::filesystem_error& e) {
@@ -63,12 +70,12 @@ void DirectoryConstructor::traverse(const std::filesystem::path& currentPath) {
                 }
             
             } else if (entry.is_directory()) {
-                _builder.startBuildDirectory(entry.path());
+                _builder.startBuildDirectory(entry.path().filename());
                 traverse(entry.path());
                 _builder.endBuildDirectory();
             
             } else if (entry.is_regular_file()) {
-                _builder.buildFile(entry.path());
+                _builder.buildFile(entry.path().filename());
             }
 
         }
