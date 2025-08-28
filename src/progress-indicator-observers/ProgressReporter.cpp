@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <sstream>
 
-explicit ProgressReporter::ProgressReporter(std::uint64_t totalExpectedBytes, std::ostream& os = std::cout)
+ProgressReporter::ProgressReporter(std::uint64_t totalExpectedBytes, std::ostream& os)
         : _os(os), _totalExpected(totalExpectedBytes) {}
 
 void ProgressReporter::start() {
