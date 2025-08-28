@@ -1,11 +1,16 @@
 #include "BaseBuilder.hpp"
 
 BaseBuilder::BaseBuilder() {
-    _root = std::make_unique<Directory>(".", nullptr);
-    _build_stack.push_back(_root.get());
+    // _root = std::make_unique<Directory>(".", nullptr);
+    // _build_stack.push_back(_root.get());
 }
 
 void BaseBuilder::startBuildDirectory(const std::filesystem::path& name) {
+    if(!_root) {
+        _root = std::make_unique<Directory>(name, nullptr);
+        _build_stack.push_back(_root.get());
+        return;
+    }
     Directory* dir_ptr = _build_stack.back()->createSubdirectory(name);
     _build_stack.push_back(dir_ptr);
 }

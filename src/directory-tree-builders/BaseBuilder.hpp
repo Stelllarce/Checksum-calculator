@@ -2,6 +2,10 @@
 #include "DirectoryStructureBuilder.hpp"
 #include <vector>
 
+/**
+ * @class BaseBuilder
+ * @brief Common ancestor providing builder operations
+ */
 class BaseBuilder : public DirectoryStructureBuilder {
 public:
 
