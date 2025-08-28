@@ -12,7 +12,7 @@ VerificationVisitor::VerificationVisitor(std::map<std::string, std::string> expe
         _expected_checksums(std::move(expected_checksums)) {}
 
 void VerificationVisitor::visitFile(File &file) {
-    std::string file_path = file.getPath();
+    std::string file_path = file.getPath().string();
     auto it = _expected_checksums.find(file_path);
 
     if (it == _expected_checksums.end()) {
@@ -33,7 +33,9 @@ void VerificationVisitor::visitFile(File &file) {
         return;
     }
 
-    std::string actual_checksum = _calculator->calculate(file.getPath());
+    std::vector<char> content = file.read();
+    std::string content_str(content.begin(), content.end());
+    std::string actual_checksum = _calculator->calculate(content_str);
 
     if (expected_checksum == actual_checksum) {
         _results[file_path] = VerificationStatus::OK;
