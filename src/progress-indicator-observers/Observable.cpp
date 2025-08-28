@@ -3,7 +3,7 @@
 #include "Message.hpp"
 
 void Observable::notify(Observable& sender, const Message& m) {
-    auto copy = _observers; // allow (un)registration during callbacks
+    auto copy = _observers;
     for (auto* obs : copy) {
         if (obs) obs->update(sender, m);
     }

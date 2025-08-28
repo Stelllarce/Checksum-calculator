@@ -33,7 +33,6 @@ void HashStreamWriter::applyAlgorithm(File& file) {
         content = file.read(debug_stream);
         debug_stream.close();
     } else {
-        // Fallback to regular read if debug stream fails
         content = file.read();
     }
 #else
