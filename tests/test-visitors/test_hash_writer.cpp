@@ -18,6 +18,8 @@ namespace {
             }
             return "mock_hash_" + std::to_string(data.length());
         }
+
+        std::string getAlgorithmName() const noexcept override { return "mock"; }
     };
 
     class HashWriterTestMockup {
@@ -180,7 +182,7 @@ TEST_CASE("HashStreamWriter - Output format", "[HashStreamWriter]") {
     auto calculator = std::make_unique<MockCalculator>();
     HashStreamWriter writer(std::move(calculator), output_stream);
     
-    SECTION("Output format should be <hash><space><path><newline>") {
+    SECTION("Output format should be <hash-type><space><hash><space><path><newline>") {
         Directory root_dir(test_mockup.base_path);
         File test_file(test_mockup.test_file1, &root_dir);
         
@@ -192,12 +194,15 @@ TEST_CASE("HashStreamWriter - Output format", "[HashStreamWriter]") {
         
         REQUIRE(std::getline(line_stream, line));
         
-        size_t space_pos = line.find(' ');
-        REQUIRE(space_pos != std::string::npos);
+        size_t space_pos1 = line.find(' ');
+        size_t space_pos2 = line.rfind(' ');
+        REQUIRE(space_pos1 != std::string::npos);
         
-        std::string hash_part = line.substr(0, space_pos);
-        std::string path_part = line.substr(space_pos + 1);
+        std::string hash_type_part = line.substr(0, space_pos1);
+        std::string hash_part = line.substr(space_pos1 + 1, strlen("mock_hash_11"));
+        std::string path_part = line.substr(space_pos2 + 1);
         
+        REQUIRE(hash_type_part == "mock");
         REQUIRE(hash_part == "mock_hash_11");
         REQUIRE(path_part == test_mockup.test_file1.string());
         
@@ -217,6 +222,9 @@ public:
         }
         return "unknown";
     }
+
+    std::string getAlgorithmName() const noexcept override { return "mock"; }
+    
 };
 
 TEST_CASE("HashStreamWriter - Integration with real-like calculator", "[HashStreamWriter]") {

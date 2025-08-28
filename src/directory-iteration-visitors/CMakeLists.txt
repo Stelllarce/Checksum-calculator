@@ -12,4 +12,6 @@ target_sources(
     PRIVATE
         "DirectoryIterationVisitor.cpp"
         "HashStreamWriter.cpp"
+        "ReportWriter.cpp"
+        "VerificationVisitor.cpp"
 )
