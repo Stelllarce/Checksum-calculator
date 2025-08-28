@@ -8,13 +8,13 @@ ReportWriter::ReportWriter(std::ostream& os)
 
 void ReportWriter::visitDirectory(Directory& dir) {
     ++_dir_count;
-    std::filesystem::path p{dir.getPath()};
+    std::filesystem::path p{dir.getPath().string()};
     _output << indentForPath(p) << "[DIR]  " << p.string() << '\n';
 }
 
 void ReportWriter::visitFile(File& file) {
     ++_file_count;
-    std::filesystem::path p{file.getPath()};
+    std::filesystem::path p{file.getPath().string()};
     auto size = file.getSize();
     _total_bytes += size;
     _output << indentForPath(p) << "- " << p.string() << " (" << size << " bytes)" << '\n';
@@ -22,10 +22,10 @@ void ReportWriter::visitFile(File& file) {
 
 void ReportWriter::visitLink(Link& link) {
     ++_link_count;
-    std::filesystem::path p{link.getPath()};
+    std::filesystem::path p{link.getPath().string()};
     _output << indentForPath(p) << "[LINK] " << p.string();
     if (auto* target = link.getResolvedTarget()) {
-        _output << " -> " << target->getPath() << '\n';
+        _output << " -> " << target->getPath().string() << '\n';
         target->accept(*this);
     } else {
         _output << " (unresolved)" << '\n';
