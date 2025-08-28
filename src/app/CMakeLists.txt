@@ -7,6 +7,11 @@ target_link_libraries(
 	main
 	PRIVATE
 		calculators
+		file-system-composite
+        directory-iteration-visitors
+        directory-tree-builders
+        utils
+        # progress_reporter_lib
 		tclap::tclap
 )
 
