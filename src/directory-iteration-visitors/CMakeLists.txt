@@ -5,6 +5,7 @@ target_link_libraries(
     PRIVATE
         file-system-composite
         calculators
+        progress-indicator-observers
 )
 
 target_sources(

@@ -28,7 +28,7 @@ void HashStreamWriter::visitLink(Link& link) {
 void HashStreamWriter::applyAlgorithm(File& file) {
     std::vector<char> content;
 #ifdef DEBUG
-    std::ifstream debug_stream(file.getPath(), std::ios::in | std::ios::binary);
+    std::ifstream debug_stream(file.getPath().string(), std::ios::in | std::ios::binary);
     if (debug_stream.is_open()) {
         content = file.read(debug_stream);
         debug_stream.close();
@@ -41,5 +41,16 @@ void HashStreamWriter::applyAlgorithm(File& file) {
 #endif
     std::string content_str(content.begin(), content.end());
     std::string checksum = _hash_strategy->calculate(content_str);
-    _output << _hash_strategy->getAlgorithmName() << " " << checksum << " " << file.getPath() << '\n';
+    _output << _hash_strategy->getAlgorithmName() << " " << checksum << " " << file.getPath().string() << '\n';
+}
+
+void HashStreamWriter::attach(Observer* observer) {
+    Observable::attach(observer);
+    if (_hash_strategy) {
+        _hash_strategy->attach(observer);
+    }
+}
+
+void HashStreamWriter::preProcess(File& file) {
+    notify(*this, NewFileMessage(file.getPath().string()));
 }
