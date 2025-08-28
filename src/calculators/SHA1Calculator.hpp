@@ -14,6 +14,7 @@ public:
      * @return SHA1 checksum as a hexadecimal string
      */
     std::string calculate(const std::string& data) noexcept override;
+    std::string getAlgorithmName() const noexcept override { return "sha1"; }
 private:
 
     

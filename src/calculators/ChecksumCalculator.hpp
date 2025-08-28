@@ -12,5 +12,6 @@ public:
      * @return checksum
      */
     virtual std::string calculate(const std::string& data) noexcept = 0;
+    virtual std::string getAlgorithmName() const noexcept = 0;
     virtual ~ChecksumCalculator() = default;
 };

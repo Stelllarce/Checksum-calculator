@@ -14,6 +14,7 @@ public:
      * @return SHA256 checksum as a hexadecimal string
      */
     std::string calculate(const std::string& data) noexcept override;
+    std::string getAlgorithmName() const noexcept override { return "sha256"; }
 private:
     
     static SHA256 sha256; ///< Shared SHA256 instance for checksum calculations
