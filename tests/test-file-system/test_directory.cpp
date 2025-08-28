@@ -14,7 +14,7 @@ TEST_CASE("Directory constructor", "[Directory]")
 
         Directory root("root");
         REQUIRE(root.getName() == "root");
-        REQUIRE(root.getPath() == "root");
+        REQUIRE(root.getPath().string() == "root");
         REQUIRE(root.getOwner() == nullptr);
     }
 
@@ -25,7 +25,7 @@ TEST_CASE("Directory constructor", "[Directory]")
 
         REQUIRE(subdir != nullptr);
         REQUIRE(subdir->getName() == "subdir");
-        REQUIRE(subdir->getPath() == "root/subdir");
+        REQUIRE(subdir->getPath().string() == "root/subdir");
         REQUIRE(subdir->getOwner() == root.get());
     }
 
@@ -65,7 +65,7 @@ TEST_CASE("Directory getPath functionality", "[Directory]")
     SECTION("Root directory path")
     {
         Directory root("root");
-        REQUIRE(root.getPath() == "root");
+        REQUIRE(root.getPath().string() == "root");
     }
 
     SECTION("Nested directory path")
@@ -74,18 +74,18 @@ TEST_CASE("Directory getPath functionality", "[Directory]")
         Directory *user_dir = root->createSubdirectory("user");
         Directory *docs_dir = user_dir->createSubdirectory("documents");
 
-        REQUIRE(user_dir->getPath() == "home/user");
-        REQUIRE(docs_dir->getPath() == "home/user/documents");
+        REQUIRE(user_dir->getPath().string() == "home/user");
+        REQUIRE(docs_dir->getPath().string() == "home/user/documents");
     }
 
     SECTION("Path consistency")
     {
         Directory dir("project");
-        std::string original_path = dir.getPath();
+        std::string original_path = dir.getPath().string();
 
         // Adding children shouldn't change the directory's own path
         dir.createFile("readme.txt");
-        REQUIRE(dir.getPath() == original_path);
+        REQUIRE(dir.getPath().string() == original_path);
     }
 }
 
@@ -98,7 +98,7 @@ TEST_CASE("Directory createSubdirectory functionality", "[Directory]")
 
         REQUIRE(child != nullptr);
         REQUIRE(child->getName() == "child");
-        REQUIRE(child->getPath() == "parent/child");
+        REQUIRE(child->getPath().string() == "parent/child");
         REQUIRE(child->getOwner() == &parent);
     }
 
@@ -131,7 +131,7 @@ TEST_CASE("Directory createSubdirectory functionality", "[Directory]")
         Directory *level2 = level1->createSubdirectory("level2");
         Directory *level3 = level2->createSubdirectory("level3");
 
-        REQUIRE(level3->getPath() == "root/level1/level2/level3");
+        REQUIRE(level3->getPath().string() == "root/level1/level2/level3");
         REQUIRE(level3->getOwner() == level2);
     }
 }
@@ -145,7 +145,7 @@ TEST_CASE("Directory createFile functionality", "[Directory]")
 
         REQUIRE(file != nullptr);
         REQUIRE(file->getName() == "readme.txt");
-        REQUIRE(file->getPath() == "documents/readme.txt");
+        REQUIRE(file->getPath().string() == "documents/readme.txt");
         REQUIRE(file->getOwner() == &parent);
     }
 
@@ -479,7 +479,7 @@ TEST_CASE("Directory composite pattern behavior", "[Directory]")
 
         // Should be able to use FileObject interface
         REQUIRE(obj->getName() == "test");
-        REQUIRE(obj->getPath() == "test");
+        REQUIRE(obj->getPath().string() == "test");
         REQUIRE(obj->getSize() == 0);
     }
 
@@ -511,7 +511,7 @@ TEST_CASE("Directory composite pattern behavior", "[Directory]")
         REQUIRE(file->getOwner() == child);
 
         // Verify path construction
-        REQUIRE(file->getPath() == "root/child/grandchild.txt");
+        REQUIRE(file->getPath().string() == "root/child/grandchild.txt");
     }
 }
 
@@ -571,7 +571,7 @@ TEST_CASE("Directory polymorphic behavior", "[Directory]")
 
         // Virtual function calls should work correctly
         REQUIRE(poly_dir->getName() == "polymorphic");
-        REQUIRE(poly_dir->getPath() == "polymorphic");
+        REQUIRE(poly_dir->getPath().string() == "polymorphic");
         REQUIRE(poly_dir->getSize() == 0);
 
         // Composite-specific operations should work

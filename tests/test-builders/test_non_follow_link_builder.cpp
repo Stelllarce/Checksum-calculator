@@ -67,19 +67,19 @@ namespace {
 }
 
 TEST_CASE("NonFollowLinkBuilder - Constructor and basic setup", "[NonFollowLinkBuilder]") {
-    SECTION("Default constructor creates valid builder") {
+    SECTION("Default constructor creates empty builder") {
         NonFollowLinkBuilder builder;
         
         auto tree = builder.getTree();
-        REQUIRE(tree != nullptr);
-        REQUIRE(tree->getName() == ".");
+        REQUIRE(tree == nullptr);
     }
 }
 
 TEST_CASE("NonFollowLinkBuilder - Creating links to files", "[NonFollowLinkBuilder]") {
     SECTION("Create link to regular file") {
         NonFollowLinkBuilder builder;
-        
+        builder.startBuildDirectory("root");
+
         auto result = builder.buildLink("file_link", test_mockup.test_file);
         
         REQUIRE(result == nullptr);
@@ -92,10 +92,12 @@ TEST_CASE("NonFollowLinkBuilder - Creating links to files", "[NonFollowLinkBuild
         REQUIRE(link_object->getName() == "file_link");
         
         REQUIRE(link_object->getTarget() == test_mockup.test_file);
+        builder.endBuildDirectory();
     }
     
     SECTION("Create link with relative path") {
         NonFollowLinkBuilder builder;
+        builder.startBuildDirectory("root");
         
         auto result = builder.buildLink("relative_link", test_mockup.relative_path);
         REQUIRE(result == nullptr);
@@ -105,10 +107,13 @@ TEST_CASE("NonFollowLinkBuilder - Creating links to files", "[NonFollowLinkBuild
         REQUIRE(link_object != nullptr);
         REQUIRE(link_object->getName() == "relative_link");
         REQUIRE(link_object->getTarget() == test_mockup.relative_path);
+        
+        builder.endBuildDirectory();
     }
     
     SECTION("Create link with absolute path") {
         NonFollowLinkBuilder builder;
+        builder.startBuildDirectory("root");
         
         auto result = builder.buildLink("absolute_link", test_mockup.absolute_path);
         REQUIRE(result == nullptr);
@@ -118,12 +123,15 @@ TEST_CASE("NonFollowLinkBuilder - Creating links to files", "[NonFollowLinkBuild
         REQUIRE(link_object != nullptr);
         REQUIRE(link_object->getName() == "absolute_link");
         REQUIRE(link_object->getTarget() == test_mockup.absolute_path);
+        
+        builder.endBuildDirectory();
     }
 }
 
 TEST_CASE("NonFollowLinkBuilder - Creating links to directories", "[NonFollowLinkBuilder]") {
     SECTION("Create link to directory") {
         NonFollowLinkBuilder builder;
+        builder.startBuildDirectory("root");
         
         auto result = builder.buildLink("dir_link", test_mockup.target_dir);
         REQUIRE(result == nullptr);
@@ -133,12 +141,15 @@ TEST_CASE("NonFollowLinkBuilder - Creating links to directories", "[NonFollowLin
         REQUIRE(link_object != nullptr);
         REQUIRE(link_object->getName() == "dir_link");
         REQUIRE(link_object->getTarget() == test_mockup.target_dir);
+        
+        builder.endBuildDirectory();
     }
 }
 
 TEST_CASE("NonFollowLinkBuilder - Creating links to symbolic links", "[NonFollowLinkBuilder]") {
     SECTION("Create link to symbolic link pointing to file") {
         NonFollowLinkBuilder builder;
+        builder.startBuildDirectory("root");
         
         auto result = builder.buildLink("symlink_to_file", test_mockup.link_to_file);
         REQUIRE(result == nullptr);
@@ -148,10 +159,13 @@ TEST_CASE("NonFollowLinkBuilder - Creating links to symbolic links", "[NonFollow
         REQUIRE(link_object != nullptr);
         REQUIRE(link_object->getName() == "symlink_to_file");
         REQUIRE(link_object->getTarget() == test_mockup.link_to_file);
+        
+        builder.endBuildDirectory();
     }
     
     SECTION("Create link to symbolic link pointing to directory") {
         NonFollowLinkBuilder builder;
+        builder.startBuildDirectory("root");
         
         auto result = builder.buildLink("symlink_to_dir", test_mockup.link_to_dir);
         REQUIRE(result == nullptr);
@@ -161,12 +175,15 @@ TEST_CASE("NonFollowLinkBuilder - Creating links to symbolic links", "[NonFollow
         REQUIRE(link_object != nullptr);
         REQUIRE(link_object->getName() == "symlink_to_dir");
         REQUIRE(link_object->getTarget() == test_mockup.link_to_dir);
+        
+        builder.endBuildDirectory();
     }
 }
 
 TEST_CASE("NonFollowLinkBuilder - Handling non-existent targets", "[NonFollowLinkBuilder]") {
     SECTION("Create link to non-existent file") {
         NonFollowLinkBuilder builder;
+        builder.startBuildDirectory("root");
         
         std::filesystem::path non_existent = test_mockup.base_path / "does_not_exist.txt";
         auto result = builder.buildLink("broken_link", non_existent);
@@ -178,10 +195,12 @@ TEST_CASE("NonFollowLinkBuilder - Handling non-existent targets", "[NonFollowLin
         REQUIRE(link_object->getName() == "broken_link");
         REQUIRE(link_object->getTarget() == non_existent);
         
+        builder.endBuildDirectory();
     }
     
     SECTION("Create link to broken symbolic link") {
         NonFollowLinkBuilder builder;
+        builder.startBuildDirectory("root");
         
         auto result = builder.buildLink("link_to_broken", test_mockup.broken_link);
         REQUIRE(result == nullptr);
@@ -191,12 +210,15 @@ TEST_CASE("NonFollowLinkBuilder - Handling non-existent targets", "[NonFollowLin
         REQUIRE(link_object != nullptr);
         REQUIRE(link_object->getName() == "link_to_broken");
         REQUIRE(link_object->getTarget() == test_mockup.broken_link);
+        
+        builder.endBuildDirectory();
     }
 }
 
 TEST_CASE("NonFollowLinkBuilder - Multiple links in same tree", "[NonFollowLinkBuilder]") {
     SECTION("Create multiple different links") {
         NonFollowLinkBuilder builder;
+        builder.startBuildDirectory("root");
         
         auto result1 = builder.buildLink("file_link", test_mockup.test_file);
         auto result2 = builder.buildLink("dir_link", test_mockup.target_dir);
@@ -230,12 +252,15 @@ TEST_CASE("NonFollowLinkBuilder - Multiple links in same tree", "[NonFollowLinkB
         REQUIRE(dir_link->getTarget() == test_mockup.target_dir);
         REQUIRE(symlink_link->getTarget() == test_mockup.link_to_file);
         REQUIRE(relative_link->getTarget() == test_mockup.relative_path);
+        
+        builder.endBuildDirectory();
     }
 }
 
 TEST_CASE("NonFollowLinkBuilder - Links within directory structure", "[NonFollowLinkBuilder]") {
     SECTION("Create links within nested directories") {
         NonFollowLinkBuilder builder;
+        builder.startBuildDirectory("root");
         
         builder.startBuildDirectory("parent");
         auto result1 = builder.buildLink("child_link", test_mockup.test_file);
@@ -264,12 +289,15 @@ TEST_CASE("NonFollowLinkBuilder - Links within directory structure", "[NonFollow
         REQUIRE(nested_link != nullptr);
         REQUIRE(nested_link->getName() == "nested_link");
         REQUIRE(nested_link->getTarget() == test_mockup.target_dir);
+        
+        builder.endBuildDirectory();
     }
 }
 
 TEST_CASE("NonFollowLinkBuilder - Mixed content in directories", "[NonFollowLinkBuilder]") {
     SECTION("Mix files, directories, and links") {
         NonFollowLinkBuilder builder;
+        builder.startBuildDirectory("root");
         
         builder.buildFile("regular_file.txt");
         auto result1 = builder.buildLink("file_link", test_mockup.test_file);
@@ -305,12 +333,15 @@ TEST_CASE("NonFollowLinkBuilder - Mixed content in directories", "[NonFollowLink
         REQUIRE(nested_link != nullptr);
         REQUIRE(nestedFile != nullptr);
         REQUIRE(nested_link->getTarget() == test_mockup.relative_path);
+        
+        builder.endBuildDirectory();
     }
 }
 
 TEST_CASE("NonFollowLinkBuilder - Link object behavior", "[NonFollowLinkBuilder]") {
     SECTION("Verify Link objects have correct properties") {
         NonFollowLinkBuilder builder;
+        builder.startBuildDirectory("root");
         
         auto result = builder.buildLink("test_link", test_mockup.test_file);
         REQUIRE(result == nullptr);
@@ -324,12 +355,14 @@ TEST_CASE("NonFollowLinkBuilder - Link object behavior", "[NonFollowLinkBuilder]
         
         REQUIRE(link_object->getResolvedTarget() == nullptr);
         
+        builder.endBuildDirectory();
     }
 }
 
 TEST_CASE("NonFollowLinkBuilder - Edge cases", "[NonFollowLinkBuilder]") {
     SECTION("Empty path as target") {
         NonFollowLinkBuilder builder;
+        builder.startBuildDirectory("root");
         
         std::filesystem::path emptyPath;
         auto result = builder.buildLink("empty_target", emptyPath);
@@ -340,10 +373,13 @@ TEST_CASE("NonFollowLinkBuilder - Edge cases", "[NonFollowLinkBuilder]") {
         REQUIRE(link_object != nullptr);
         REQUIRE(link_object->getName() == "empty_target");
         REQUIRE(link_object->getTarget() == emptyPath);
+        
+        builder.endBuildDirectory();
     }
     
     SECTION("Same name for multiple links - last one wins") {
         NonFollowLinkBuilder builder;
+        builder.startBuildDirectory("root");
         
         auto result1 = builder.buildLink("duplicate", test_mockup.test_file);
         auto result2 = builder.buildLink("duplicate", test_mockup.target_dir);
@@ -356,5 +392,7 @@ TEST_CASE("NonFollowLinkBuilder - Edge cases", "[NonFollowLinkBuilder]") {
         REQUIRE(link_object != nullptr);
         
         REQUIRE(link_object->getName() == "duplicate");
+        
+        builder.endBuildDirectory();
     }
 }

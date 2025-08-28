@@ -8,6 +8,7 @@ target_link_libraries(
         file-system-composite
         directory-tree-builders
         directory-iteration-visitors
+        progress-indicator-observers
         utils
 )
 
@@ -29,6 +30,8 @@ target_sources(
         "test-visitors/test_hash_writer.cpp"
         "test-visitors/test_report_writer.cpp"
         "test-visitors/test_verification_visitor.cpp"
+        "progress-indicator-tests/test_progress_reporter.cpp"
+        "progress-indicator-tests/test_observable.cpp"
 )
 
 # Automatically register all tests

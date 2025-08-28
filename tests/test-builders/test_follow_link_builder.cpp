@@ -78,21 +78,12 @@ namespace {
 }
 
 TEST_CASE("LinkFollowBuilder - Constructor and basic setup", "[LinkFollowBuilder]") {
-    SECTION("Constructor with CycleDetector") {
+    SECTION("Constructor creates an empty tree") {
         auto detector = std::make_unique<CycleDetector>();
         LinkFollowBuilder builder(std::move(detector));
         
         auto tree = builder.getTree();
-        REQUIRE(tree != nullptr);
-        REQUIRE(tree->getName() == ".");
-    }
-    
-    SECTION("Constructor creates valid builder") {
-        auto detector = std::make_unique<CycleDetector>();
-        LinkFollowBuilder builder(std::move(detector));
-        
-        auto tree = builder.getTree();
-        REQUIRE(tree != nullptr);
+        REQUIRE(tree == nullptr);
     }
 }
 
@@ -101,8 +92,10 @@ TEST_CASE("LinkFollowBuilder - Following file links", "[LinkFollowBuilder]") {
         auto detector = std::make_unique<CycleDetector>();
         LinkFollowBuilder builder(std::move(detector));
         
+        builder.startBuildDirectory("root");
         auto result = builder.buildLink("linked_file", test_mockup.test_file);
-        
+        builder.endBuildDirectory();
+
         REQUIRE(result == nullptr);
         
         auto tree = builder.getTree();
@@ -117,8 +110,10 @@ TEST_CASE("LinkFollowBuilder - Following file links", "[LinkFollowBuilder]") {
         auto detector = std::make_unique<CycleDetector>();
         LinkFollowBuilder builder(std::move(detector));
         
+        builder.startBuildDirectory("root");
         auto result = builder.buildLink("symlinked_file", test_mockup.link_to_file);
-        
+        builder.endBuildDirectory();
+
         REQUIRE(result == nullptr);
         
         auto tree = builder.getTree();
@@ -133,8 +128,10 @@ TEST_CASE("LinkFollowBuilder - Following directory links", "[LinkFollowBuilder]"
         auto detector = std::make_unique<CycleDetector>();
         LinkFollowBuilder builder(std::move(detector));
         
+        builder.startBuildDirectory("root");
         auto result = builder.buildLink("linked_dir", test_mockup.target_dir);
-        
+        builder.endBuildDirectory();
+
         REQUIRE(result != nullptr);
         REQUIRE(result->getName() == "linked_dir");
         
@@ -148,7 +145,9 @@ TEST_CASE("LinkFollowBuilder - Following directory links", "[LinkFollowBuilder]"
         auto detector = std::make_unique<CycleDetector>();
         LinkFollowBuilder builder(std::move(detector));
         
+        builder.startBuildDirectory("root");
         auto result = builder.buildLink("symlinked_dir", test_mockup.link_to_dir);
+        builder.endBuildDirectory();
         
         REQUIRE(result != nullptr);
         REQUIRE(result->getName() == "symlinked_dir");
@@ -165,6 +164,7 @@ TEST_CASE("LinkFollowBuilder - Cycle detection integration", "[LinkFollowBuilder
         auto detector = std::make_unique<CycleDetector>();
         LinkFollowBuilder builder(std::move(detector));
         
+        builder.startBuildDirectory("root");
         auto result1 = builder.buildLink("first_visit", test_mockup.test_file);
         REQUIRE(result1 == nullptr);
         
@@ -177,12 +177,14 @@ TEST_CASE("LinkFollowBuilder - Cycle detection integration", "[LinkFollowBuilder
         
         auto second_file = tree->getChild("second_visit");
         REQUIRE(second_file == nullptr);
+        builder.endBuildDirectory();
     }
     
     SECTION("Different paths should not interfere") {
         auto detector = std::make_unique<CycleDetector>();
         LinkFollowBuilder builder(std::move(detector));
-        
+        builder.startBuildDirectory("root");
+
         auto result1 = builder.buildLink("file1", test_mockup.test_file);
         auto result2 = builder.buildLink("file2", test_mockup.nested_file);
         
@@ -197,6 +199,8 @@ TEST_CASE("LinkFollowBuilder - Cycle detection integration", "[LinkFollowBuilder
         REQUIRE(file2 != nullptr);
         REQUIRE(file1->getName() == "file1");
         REQUIRE(file2->getName() == "file2");
+        
+        builder.endBuildDirectory();
     }
 }
 
@@ -204,7 +208,8 @@ TEST_CASE("LinkFollowBuilder - Real cycle detection", "[LinkFollowBuilder]") {
     SECTION("Detect circular symbolic links") {
         auto detector = std::make_unique<CycleDetector>();
         LinkFollowBuilder builder(std::move(detector));
-        
+        builder.startBuildDirectory("root");
+
         auto result1 = builder.buildLink("circular1", test_mockup.circular_link1);
         auto result2 = builder.buildLink("circular2", test_mockup.circular_link2);
         
@@ -214,6 +219,7 @@ TEST_CASE("LinkFollowBuilder - Real cycle detection", "[LinkFollowBuilder]") {
         auto tree = builder.getTree();
         
         REQUIRE(tree != nullptr);
+        builder.endBuildDirectory();
     }
 }
 
@@ -221,6 +227,7 @@ TEST_CASE("LinkFollowBuilder - Error handling", "[LinkFollowBuilder]") {
     SECTION("Broken symbolic link") {
         auto detector = std::make_unique<CycleDetector>();
         LinkFollowBuilder builder(std::move(detector));
+        builder.startBuildDirectory("root");
         
         auto result = builder.buildLink("broken", test_mockup.broken_link);
         
@@ -231,11 +238,13 @@ TEST_CASE("LinkFollowBuilder - Error handling", "[LinkFollowBuilder]") {
         
         auto broken_item = tree->getChild("broken");
         REQUIRE(broken_item == nullptr);
+        builder.endBuildDirectory();
     }
     
     SECTION("Non-existent path") {
         auto detector = std::make_unique<CycleDetector>();
         LinkFollowBuilder builder(std::move(detector));
+        builder.startBuildDirectory("root");
         
         std::filesystem::path non_existent = test_mockup.base_path / "does_not_exist";
         auto result = builder.buildLink("non_existent", non_existent);
@@ -247,6 +256,7 @@ TEST_CASE("LinkFollowBuilder - Error handling", "[LinkFollowBuilder]") {
         
         auto non_existent_item = tree->getChild("non_existent");
         REQUIRE(non_existent_item == nullptr);
+        builder.endBuildDirectory();
     }
 }
 
@@ -254,6 +264,7 @@ TEST_CASE("LinkFollowBuilder - Multiple links in same tree", "[LinkFollowBuilder
     SECTION("Build multiple different links") {
         auto detector = std::make_unique<CycleDetector>();
         LinkFollowBuilder builder(std::move(detector));
+        builder.startBuildDirectory("root");
         
         auto result1 = builder.buildLink("file_link", test_mockup.test_file);
         auto result2 = builder.buildLink("dir_link", test_mockup.target_dir);
@@ -279,11 +290,13 @@ TEST_CASE("LinkFollowBuilder - Multiple links in same tree", "[LinkFollowBuilder
         REQUIRE(file_link->getName() == "file_link");
         REQUIRE(dir_link->getName() == "dir_link");
         REQUIRE(nested_file_link->getName() == "nested_file_link");
+        builder.endBuildDirectory();
     }
     
     SECTION("Build multiple links to same target - only first should succeed") {
         auto detector = std::make_unique<CycleDetector>();
         LinkFollowBuilder builder(std::move(detector));
+        builder.startBuildDirectory("root");
         
         auto result1 = builder.buildLink("first_link", test_mockup.test_file);
         auto result2 = builder.buildLink("second_link", test_mockup.test_file);
@@ -305,6 +318,7 @@ TEST_CASE("LinkFollowBuilder - Multiple links in same tree", "[LinkFollowBuilder
         REQUIRE(third_link == nullptr);
         
         REQUIRE(first_link->getName() == "first_link");
+        builder.endBuildDirectory();
     }
 }
 
@@ -312,6 +326,7 @@ TEST_CASE("LinkFollowBuilder - Directory building behavior", "[LinkFollowBuilder
     SECTION("Directory link creates empty directory structure") {
         auto detector = std::make_unique<CycleDetector>();
         LinkFollowBuilder builder(std::move(detector));
+        builder.startBuildDirectory("root");
         
         auto result = builder.buildLink("target_dir", test_mockup.target_dir);
         
@@ -323,5 +338,6 @@ TEST_CASE("LinkFollowBuilder - Directory building behavior", "[LinkFollowBuilder
         REQUIRE(linked_dir != nullptr);
         
         REQUIRE(linked_dir->getName() == "target_dir");
+        builder.endBuildDirectory();
     }
 }

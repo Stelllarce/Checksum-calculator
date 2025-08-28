@@ -15,7 +15,7 @@ TEST_CASE("Link constructor", "[Link]") {
         
         Link link("link1", "target.txt", root_dir.get());
         REQUIRE(link.getName() == "link1");
-        REQUIRE(link.getPath() == "root/link1");
+        REQUIRE(link.getPath().string() == "root/link1");
         REQUIRE(link.getTarget() == "target.txt");
         REQUIRE(link.getOwner() == root_dir.get());
     }
@@ -34,7 +34,7 @@ TEST_CASE("Link constructor", "[Link]") {
         
         Link root_link("root_link", "some_target", nullptr);
         REQUIRE(root_link.getName() == "root_link");
-        REQUIRE(root_link.getPath() == "root_link");
+        REQUIRE(root_link.getPath().string() == "root_link");
         REQUIRE(root_link.getOwner() == nullptr);
     }
     
@@ -82,7 +82,7 @@ TEST_CASE("Link getPath functionality", "[Link]") {
         std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("home");
         Link link("config_link", "config.ini", root_dir.get());
         
-        std::string path = link.getPath();
+        std::string path = link.getPath().string();
         REQUIRE_FALSE(path.empty());
         REQUIRE(path == "home/config_link");
     }
@@ -91,8 +91,8 @@ TEST_CASE("Link getPath functionality", "[Link]") {
         std::unique_ptr<FileObject> root_dir = std::make_unique<Directory>("projects");
         Link link("main_link", "main.cpp", root_dir.get());
         
-        std::string path_1 = link.getPath();
-        std::string path_2 = link.getPath();
+        std::string path_1 = link.getPath().string();
+        std::string path_2 = link.getPath().string();
         
         REQUIRE(path_1 == path_2);
         REQUIRE(path_1 == "projects/main_link");
@@ -103,7 +103,7 @@ TEST_CASE("Link getPath functionality", "[Link]") {
         FileObject* sub_dir = root_dir->createSubdirectory("user");
         Link link("settings_link", "settings.conf", sub_dir);
         
-        REQUIRE(link.getPath() == "home/user/settings_link");
+        REQUIRE(link.getPath().string() == "home/user/settings_link");
     }
 }
 
@@ -288,7 +288,7 @@ TEST_CASE("Link polymorphic behavior", "[Link]") {
         std::unique_ptr<FileObject> link_obj = std::make_unique<Link>("poly_link", "target", root_dir.get());
         
         REQUIRE_NOTHROW(link_obj->getName());
-        REQUIRE_NOTHROW(link_obj->getPath());
+        REQUIRE_NOTHROW(link_obj->getPath().string());
         REQUIRE(link_obj->getSize() == 0);
         
         // Composite methods should return default values
@@ -323,7 +323,7 @@ TEST_CASE("Link edge cases and error handling", "[Link]") {
         Link link(long_name, "target", root_dir.get());
         
         REQUIRE(link.getName() == long_name);
-        REQUIRE(link.getPath().find(long_name) != std::string::npos);
+        REQUIRE(link.getPath().string().find(long_name) != std::string::npos);
     }
     
     SECTION("Link name with special characters") {
@@ -333,7 +333,7 @@ TEST_CASE("Link edge cases and error handling", "[Link]") {
         Link link(special_name, "target", root_dir.get());
         
         REQUIRE(link.getName() == special_name);
-        REQUIRE(link.getPath() == "test/" + special_name);
+        REQUIRE(link.getPath().string() == "test/" + special_name);
     }
     
     SECTION("Very long target path") {
@@ -356,9 +356,9 @@ TEST_CASE("Link memory and resource management", "[Link]") {
         Link link_2("same_link", "target2", dir_2.get());
         
         REQUIRE(link_1.getName() == link_2.getName());
-        REQUIRE(link_1.getPath() != link_2.getPath());
-        REQUIRE(link_1.getPath() == "dir1/same_link");
-        REQUIRE(link_2.getPath() == "dir2/same_link");
+        REQUIRE(link_1.getPath().string() != link_2.getPath().string());
+        REQUIRE(link_1.getPath().string() == "dir1/same_link");
+        REQUIRE(link_2.getPath().string() == "dir2/same_link");
         REQUIRE(link_1.getTarget() != link_2.getTarget());
     }
     
