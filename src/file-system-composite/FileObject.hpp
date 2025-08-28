@@ -29,7 +29,7 @@ public:
     /**
      * @return _filepath - full path to the file or directory
      */
-    virtual std::string getPath() const { return _filepath.string(); };
+    virtual std::filesystem::path getPath() const { return _filepath; };
 
     /**
      * @return the size in bytes of the file or directory.
