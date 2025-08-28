@@ -22,6 +22,11 @@ void DirectoryConstructor::construct(std::initializer_list<std::filesystem::path
             }
             
             if (std::filesystem::is_symlink(root_path)) {
+                auto parent_path = root_path.parent_path();
+                if (parent_path.empty()) {
+                    parent_path = ".";
+                }
+                _builder.startBuildDirectory(parent_path);
                 auto target = std::filesystem::read_symlink(root_path);
                 Directory* traversal_target = _builder.buildLink(root_path.filename(), target);
                 if (traversal_target) {
@@ -32,7 +37,6 @@ void DirectoryConstructor::construct(std::initializer_list<std::filesystem::path
             }
 
             if (std::filesystem::is_regular_file(root_path)) {
-                // For single files, create a parent directory to contain the file
                 auto parent_path = root_path.parent_path();
                 if (parent_path.empty()) {
                     parent_path = ".";
