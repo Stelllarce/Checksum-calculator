@@ -6,6 +6,7 @@ target_link_libraries(
     calculators
     PRIVATE
         lib
+        progress-indicator-observers
 )
 
 target_sources(

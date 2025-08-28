@@ -1,16 +1,14 @@
 #pragma once
 #include <string>
+#include "progress-indicator-observers/Observable.hpp"
 
 /**
- * @interface for all checksum algorithms
+ * @interface ChecksumCalculator
+ * @brief Strategy interface for checksum algorithms. Observable to report progress.
  */
-class ChecksumCalculator {
+class ChecksumCalculator : public Observable {
 public:
-    /**
-     * @brief Calculate checksum for given data
-     * @param data - data to calculate checksum for
-     * @return checksum
-     */
+    /// Calculate checksum for given data
     virtual std::string calculate(const std::string& data) noexcept = 0;
     virtual std::string getAlgorithmName() const noexcept = 0;
     virtual ~ChecksumCalculator() = default;
