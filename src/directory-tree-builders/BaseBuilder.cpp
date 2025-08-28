@@ -1,7 +1,7 @@
 #include "BaseBuilder.hpp"
 
 BaseBuilder::BaseBuilder() {
-    _root = std::make_unique<Directory>("(virtual_root)", nullptr);
+    _root = std::make_unique<Directory>(".", nullptr);
     _build_stack.push_back(_root.get());
 }
 

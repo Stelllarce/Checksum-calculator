@@ -72,7 +72,7 @@ TEST_CASE("NonFollowLinkBuilder - Constructor and basic setup", "[NonFollowLinkB
         
         auto tree = builder.getTree();
         REQUIRE(tree != nullptr);
-        REQUIRE(tree->getName() == "(virtual_root)");
+        REQUIRE(tree->getName() == ".");
     }
 }
 

@@ -118,7 +118,7 @@ TEST_CASE("DirectoryConstructor - Single file construction with NonFollowLinkBui
         
         auto tree = builder.getTree();
         REQUIRE(tree != nullptr);
-        REQUIRE(tree->getName() == "(virtual_root)");
+        REQUIRE(tree->getName() == ".");
         
         auto file_obj = tree->getChild("standalone.txt");
         REQUIRE(file_obj != nullptr);
@@ -135,7 +135,7 @@ TEST_CASE("DirectoryConstructor - Single file construction with NonFollowLinkBui
         auto tree = builder.getTree();
         REQUIRE(tree != nullptr);
         
-        REQUIRE(tree->getName() == "(virtual_root)");
+        REQUIRE(tree->getName() == ".");
     }
 }
 
@@ -149,7 +149,7 @@ TEST_CASE("DirectoryConstructor - Single file construction with LinkFollowBuilde
         
         auto tree = builder.getTree();
         REQUIRE(tree != nullptr);
-        REQUIRE(tree->getName() == "(virtual_root)");
+        REQUIRE(tree->getName() == ".");
         
         auto file_obj = tree->getChild("standalone.txt");
         REQUIRE(file_obj != nullptr);
@@ -358,7 +358,7 @@ TEST_CASE("DirectoryConstructor - Symbolic link handling with LinkFollowBuilder"
         auto tree = builder.getTree();
         REQUIRE(tree != nullptr);
         
-        REQUIRE(tree->getName() == "(virtual_root)");
+        REQUIRE(tree->getName() == ".");
     }
     
     SECTION("Construct starting from symbolic link to file - should follow") {
@@ -371,7 +371,7 @@ TEST_CASE("DirectoryConstructor - Symbolic link handling with LinkFollowBuilder"
         auto tree = builder.getTree();
         REQUIRE(tree != nullptr);
         
-        REQUIRE(tree->getName() == "(virtual_root)");
+        REQUIRE(tree->getName() == ".");
     }
 }
 
@@ -384,7 +384,7 @@ TEST_CASE("DirectoryConstructor - Error handling", "[DirectoryConstructor]") {
         
         auto tree = builder.getTree();
         REQUIRE(tree != nullptr);
-        REQUIRE(tree->getName() == "(virtual_root)");
+        REQUIRE(tree->getName() == ".");
     }
     
     SECTION("Empty root paths list with LinkFollowBuilder") {
@@ -397,7 +397,7 @@ TEST_CASE("DirectoryConstructor - Error handling", "[DirectoryConstructor]") {
         auto tree = builder.getTree();
         REQUIRE(tree != nullptr);
         
-        REQUIRE(tree->getName() == "(virtual_root)");
+        REQUIRE(tree->getName() == ".");
     }
     
     SECTION("Non-existent paths - should handle gracefully") {
@@ -412,7 +412,7 @@ TEST_CASE("DirectoryConstructor - Error handling", "[DirectoryConstructor]") {
         auto tree = builder.getTree();
         REQUIRE(tree != nullptr);
         
-        REQUIRE(tree->getName() == "(virtual_root)");
+        REQUIRE(tree->getName() == ".");
     }
     
     SECTION("Mixed valid and invalid paths") {

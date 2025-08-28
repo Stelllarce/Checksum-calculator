@@ -14,4 +14,5 @@ target_sources(
         "Md5Calculator.cpp"
         "SHA1Calculator.cpp"
         "SHA256Calculator.cpp"
+        "CalculatorFactory.cpp"
 )

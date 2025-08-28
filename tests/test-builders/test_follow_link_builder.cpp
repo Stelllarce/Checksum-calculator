@@ -84,7 +84,7 @@ TEST_CASE("LinkFollowBuilder - Constructor and basic setup", "[LinkFollowBuilder
         
         auto tree = builder.getTree();
         REQUIRE(tree != nullptr);
-        REQUIRE(tree->getName() == "(virtual_root)");
+        REQUIRE(tree->getName() == ".");
     }
     
     SECTION("Constructor creates valid builder") {
